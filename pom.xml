@@ -4,7 +4,7 @@
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- Podedujemo iz Spring Boot parenta (verzija 3.4.2) -->
+
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -63,6 +63,7 @@
         <java.version>21</java.version>
         <vaadin.version>24.6.5</vaadin.version>
         <lombok.version>1.18.36</lombok.version>
+        <amascenko.version>1.16.0</amascenko.version>
     </properties>
 
     <!-- Poskrbi, da za Vaadin ni treba navajati verzije -->
@@ -90,7 +91,7 @@
                 <plugin>
                     <groupId>com.amashchenko.maven.plugin</groupId>
                     <artifactId>gitflow-maven-plugin</artifactId>
-                    <version>1.16.0</version>
+                    <version>${amascenko.version}</version>
 
                 </plugin>
 

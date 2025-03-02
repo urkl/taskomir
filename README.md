@@ -8,10 +8,8 @@ I really like Vaadin and I wanted to create a simple task manager that can be us
 
 For persistance, Mongo is used. If you dont' have Mongo installed, you can use the provided docker-compose file to start it.
 
-```bash
-![img.png](img.png)
 
-
+![taskomir.png](taskomir.png)
 
 
 

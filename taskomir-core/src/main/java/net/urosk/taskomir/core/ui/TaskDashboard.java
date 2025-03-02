@@ -38,7 +38,7 @@ import java.util.stream.Stream;
 import static com.vaadin.flow.component.button.ButtonVariant.*;
 import static com.vaadin.flow.component.grid.GridVariant.LUMO_COMPACT;
 
-public class AllTasksComponent extends VerticalLayout {
+public class TaskDashboard extends VerticalLayout {
 
     private static final DateTimeFormatter SL_FORMATTER =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", new Locale("sl", "SI"));
@@ -53,7 +53,7 @@ public class AllTasksComponent extends VerticalLayout {
     private final Grid<TaskInfo> failedGrid = new Grid<>(TaskInfo.class, false);
     private final Grid<TaskInfo> deletedGrid = new Grid<>(TaskInfo.class, false);
 
-    public AllTasksComponent(TaskManagerService taskManager, MessageSource messageSource) {
+    public TaskDashboard(TaskManagerService taskManager, MessageSource messageSource) {
         this.taskManager = taskManager;
         this.messageSource = messageSource;
 
