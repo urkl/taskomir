@@ -12,7 +12,6 @@ For persistance, Mongo is used. If you dont' have Mongo installed, you can use t
 ![taskomir.png](taskomir.png)
 
 
-
 ## Key Features
 
 - **Core Library** (`taskomir-core`):
@@ -27,6 +26,10 @@ For persistance, Mongo is used. If you dont' have Mongo installed, you can use t
     - Displays real-time progress updates.
     - Allows cancellation, deletion, and filtering by task status.
     - Serves as a reference to show how Taskomir can be integrated in a full-stack setup.
+
+## Screenshots
+
+![screenshot.png](screenshot.png)
 
 ## Structure
 
