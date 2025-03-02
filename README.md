@@ -1,12 +1,14 @@
 # Taskomir
 
-**Taskomir** is a Java-based background task manager designed to schedule and monitor long-running processes.
+**Taskomir** is a Java-based simple background task manager designed to schedule and monitor long-running processes.
 It provides a flexible, extensible core library and a demo application showcasing how to integrate scheduling,
 progress tracking, and a Vaadin-based UI.
+You can use Taskomir Dashboard Ui component in your own application. Just add the dependency to your project and use it. Check the demo!
 
 I really like Vaadin and I wanted to create a simple task manager that can be used in any Java application.
 
-For persistance, Mongo is used. If you dont' have Mongo installed, you can use the provided docker-compose file to start it.
+For persistance, Mongo is used. If you don't have Mongo installed, you can use the provided docker-compose file to start it.
+Of course, you can use any other database, just implement the TaskRepository interface.
 
 
 ![taskomir.png](taskomir.png)
