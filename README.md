@@ -31,6 +31,15 @@ For persistance, Mongo is used. If you dont' have Mongo installed, you can use t
 
 ![screenshot.png](screenshot.png)
 
+
+## TODO
+
+- [ ] Add tests
+- [ ] Add more features
+- [ ] Add more documentation
+- [ ] Add more tests
+- [ ] Deploy to Maven  Central Repository
+
 ## Structure
 
     taskomir-parent/      (aggregator POM for both modules, includes plugin/dependency management)
