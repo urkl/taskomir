@@ -1,0 +1,15 @@
+
+services:
+
+  mongo:
+    image: mongo:latest
+    container_name: taskomir-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: rootpassword
+      TZ: Europe/Ljubljana
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./taskomir-mongo-persistence:/data/db
+

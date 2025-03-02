@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: Urosk Taskomir Demo
+  data:
+    mongodb:
+      uri: mongodb://root:rootpassword@localhost:50001/taskomir?authSource=admin
+  messages:
+    basename: messages
+    encoding: UTF-8
+    fallback-to-system-locale: false
+
+
+server:
+  port: 8888
+
+
+taskomir:
+  cleanupIntervalMs: 15000            # Clean every 15 seconds
+  succeededRetentionTimeMs: 800000 # Move succeeded jobs to deleted after 800 seconds
+  deletedRetentionTimeMs: 6000000   # Delete deleted jobs after 6000 seconds
+  poolSize: 4
+  queueCapacity: 1000 # Maximum number of jobs in the queue
+
+
+
+vaadin:
+  allowed-packages: net.urosk.*
+
+logging:
+  level:
+    root: info
+    org.atmosphere: error
+    net.urosk: debug
