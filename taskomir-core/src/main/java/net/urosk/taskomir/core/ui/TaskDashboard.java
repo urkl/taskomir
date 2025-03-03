@@ -3,11 +3,10 @@ package net.urosk.taskomir.core.ui;
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.GridVariant;
-import com.vaadin.flow.component.html.H3;
-import com.vaadin.flow.component.html.Hr;
-import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
@@ -18,7 +17,8 @@ import com.vaadin.flow.dom.ThemeList;
 import net.urosk.taskomir.core.lib.TaskInfo;
 import net.urosk.taskomir.core.lib.TaskStatus;
 import net.urosk.taskomir.core.sampleTask.SampleScheduledTask;
-import net.urosk.taskomir.core.service.TaskManagerService;
+import net.urosk.taskomir.core.sampleTask.SampleSpringScheduledTask;
+import net.urosk.taskomir.core.service.TaskomirService;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
@@ -42,7 +42,7 @@ public class TaskDashboard extends VerticalLayout {
 
     private static final DateTimeFormatter SL_FORMATTER =
             DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", new Locale("sl", "SI"));
-    private final TaskManagerService taskManager;
+    private final TaskomirService taskomirService;
     private final MessageSource messageSource;
 
     // Gridi za posamezne statuse
@@ -53,8 +53,8 @@ public class TaskDashboard extends VerticalLayout {
     private final Grid<TaskInfo> failedGrid = new Grid<>(TaskInfo.class, false);
     private final Grid<TaskInfo> deletedGrid = new Grid<>(TaskInfo.class, false);
 
-    public TaskDashboard(TaskManagerService taskManager, MessageSource messageSource) {
-        this.taskManager = taskManager;
+    public TaskDashboard(TaskomirService taskomirService, MessageSource messageSource) {
+        this.taskomirService = taskomirService;
         this.messageSource = messageSource;
 
         HorizontalLayout buttons = new HorizontalLayout();
@@ -67,15 +67,17 @@ public class TaskDashboard extends VerticalLayout {
 
         Button addTaskButton = new Button(addTaskText, event -> addNewTask());
         Button addErrorTaskButton = new Button(addErrorTaskText, event -> addErrorTask());
-        CronField cronField = new CronField();
-        Button addScheduledTaskButton = new Button(addScheduledTaskText, event -> addScheduledTask(cronField.getValue()));
 
-        buttons.add(addTaskButton, addErrorTaskButton, cronField, addScheduledTaskButton);
+        CronField cronField = new CronField();
+
+        Button addScheduledTaskButton = new Button(addScheduledTaskText, event -> addScheduledTask(cronField.getValue()));
+        Button addScheduledTaskButton2 = new Button(addScheduledTaskText, event -> addScheduledTaskSpring(cronField.getValue()));
+
+        buttons.add(addTaskButton, addErrorTaskButton, cronField, addScheduledTaskButton, addScheduledTaskButton2);
         add(buttons);
 
         // Dodaj ločilno črto
         add(new Hr());
-
 
 
         // SCHEDULED tasks
@@ -93,7 +95,7 @@ public class TaskDashboard extends VerticalLayout {
                 messageSource.getMessage("ui.enqueuedHeader", null, LocaleContextHolder.getLocale()),
                 "var(--lumo-primary-color)", enqueuedCounter,
                 new Button(messageSource.getMessage("ui.cleanEnqueued", null, LocaleContextHolder.getLocale()),
-                        event -> taskManager.deleteTasksByStatus(TaskStatus.ENQUEUED))));
+                        event -> taskomirService.deleteTasksByStatus(TaskStatus.ENQUEUED))));
         configureDefaultColumns(enqueuedGrid, false, true, false, false);
         enqueuedGrid.setDataProvider(createDataProvider(TaskStatus.ENQUEUED, count -> enqueuedCounter.setText(String.valueOf(count))));
         add(enqueuedGrid);
@@ -113,7 +115,7 @@ public class TaskDashboard extends VerticalLayout {
                 messageSource.getMessage("ui.succeededHeader", null, LocaleContextHolder.getLocale()),
                 "var(--lumo-success-color)", succeededCounter,
                 new Button(messageSource.getMessage("ui.cleanSucceeded", null, LocaleContextHolder.getLocale()),
-                        event -> taskManager.deleteTasksByStatus(TaskStatus.SUCCEEDED))));
+                        event -> taskomirService.deleteTasksByStatus(TaskStatus.SUCCEEDED))));
         configureDefaultColumns(succeededGrid, false, false, false, false);
         succeededGrid.setDataProvider(createDataProvider(TaskStatus.SUCCEEDED, count -> succeededCounter.setText(String.valueOf(count))));
         add(succeededGrid);
@@ -124,7 +126,7 @@ public class TaskDashboard extends VerticalLayout {
                         messageSource.getMessage("ui.failedHeader", null, LocaleContextHolder.getLocale()),
                         "var(--lumo-error-color)", failedCounter),
                 new Button(messageSource.getMessage("ui.cleanFailed", null, LocaleContextHolder.getLocale()),
-                        event -> taskManager.deleteTasksByStatus(TaskStatus.FAILED)));
+                        event -> taskomirService.deleteTasksByStatus(TaskStatus.FAILED)));
         configureDefaultColumns(failedGrid, false, false, true, false);
         failedGrid.setDataProvider(createDataProvider(TaskStatus.FAILED, count -> failedCounter.setText(String.valueOf(count))));
         add(failedGrid);
@@ -136,16 +138,20 @@ public class TaskDashboard extends VerticalLayout {
                         "var(--lumo-error-color)"),
                 deletedCounter,
                 new Button(messageSource.getMessage("ui.cleanDeleted", null, LocaleContextHolder.getLocale()),
-                        event -> taskManager.deleteTasksByStatus(TaskStatus.DELETED)));
+                        event -> taskomirService.deleteTasksByStatus(TaskStatus.DELETED)));
         configureDefaultColumns(deletedGrid, false, false, false, false);
         deletedGrid.setDataProvider(createDataProvider(TaskStatus.DELETED, count -> deletedCounter.setText(String.valueOf(count))));
         add(deletedGrid);
 
         // Nastavi polling – osvežujemo podatke vsako 300ms
         UI.getCurrent().getUI().ifPresent(ui -> {
-            ui.setPollInterval(300);
+            ui.setPollInterval(1500);
             ui.addPollListener(e -> refreshAll());
         });
+    }
+
+    private void addScheduledTaskSpring(String cronExpression) {
+        taskomirService.createScheduledTask("Scheduled task", new SampleSpringScheduledTask(), cronExpression, false);
     }
 
     public void refreshAll() {
@@ -171,11 +177,15 @@ public class TaskDashboard extends VerticalLayout {
     }
 
     private void configureDefaultColumns(Grid<TaskInfo> grid, boolean showProgressBar, boolean addKillButton, boolean addError, boolean addExecuteNowButton) {
+
         grid.addThemeVariants(LUMO_COMPACT, GridVariant.LUMO_WRAP_CELL_CONTENT);
+
         grid.addColumn(TaskInfo::getId)
                 .setHeader(messageSource.getMessage("grid.column.id", null, LocaleContextHolder.getLocale()));
+
         grid.addColumn(TaskInfo::getName)
                 .setHeader(messageSource.getMessage("grid.column.name", null, LocaleContextHolder.getLocale()));
+
         grid.addColumn(task -> {
                     if (task.getClassName() == null) return "";
                     return task.getClassName().substring(task.getClassName().lastIndexOf('.') + 1);
@@ -184,19 +194,28 @@ public class TaskDashboard extends VerticalLayout {
 
         grid.addColumn(task -> task.getProgress() * 100 + "%")
                 .setHeader(messageSource.getMessage("grid.column.progress", null, LocaleContextHolder.getLocale()));
+
         if (showProgressBar) {
+
             grid.addComponentColumn(task -> {
                 ProgressBar progressBar = new ProgressBar(0, 1, task.getProgress());
                 progressBar.setWidth("150px");
                 return progressBar;
             }).setHeader(messageSource.getMessage("grid.column.progress", null, LocaleContextHolder.getLocale()));
+
+            grid.addColumn(TaskInfo::getCurrentProgress
+            ).setHeader(messageSource.getMessage("grid.column.progressText", null, LocaleContextHolder.getLocale()));
         }
+
+
         grid.addColumn(task -> task.getStatus().toString())
                 .setHeader(messageSource.getMessage("grid.column.status", null, LocaleContextHolder.getLocale()));
+
         grid.addColumn(task ->
                 LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getCreatedAt()), ZoneId.systemDefault())
                         .format(SL_FORMATTER)
         ).setHeader(messageSource.getMessage("grid.column.created", null, LocaleContextHolder.getLocale()));
+
 
         grid.addColumn(task ->
                 task.getStartedAt() != null ?
@@ -229,8 +248,10 @@ public class TaskDashboard extends VerticalLayout {
                         Button killButton = new Button(LineAwesomeIcon.SKULL_CROSSBONES_SOLID.create());
                         killButton.addThemeVariants(LUMO_ERROR, LUMO_PRIMARY, LUMO_ICON);
                         killButton.addClickListener(e -> {
-                            taskManager.cancelTask(task.getId());
-                            refreshAll();
+                            UI.getCurrent().access(() -> {
+                                boolean canceled = taskomirService.cancelTask(task.getId());
+                                refreshAll();
+                            });
                         });
                         return killButton;
                     }).setHeader(messageSource.getMessage("grid.column.kill", null, LocaleContextHolder.getLocale()))
@@ -243,14 +264,38 @@ public class TaskDashboard extends VerticalLayout {
                         Button executeNowButton = new Button(LineAwesomeIcon.PLAY_CIRCLE.create());
                         executeNowButton.addThemeVariants(LUMO_SUCCESS, LUMO_ICON, LUMO_PRIMARY);
                         executeNowButton.addClickListener(e -> {
-                            taskManager.enqueueNewChildOf(task);
-                            refreshAll();
+                            UI.getCurrent().access(() -> {
+                                taskomirService.enqueueNewChildOf(task);
+                                refreshAll();
+                            });
                         });
                         return executeNowButton;
                     }).setHeader(messageSource.getMessage("grid.column.execute", null, LocaleContextHolder.getLocale()))
                     .setAutoWidth(true)
                     .setFlexGrow(0);
         }
+
+        grid.addComponentColumn(task -> {
+            Button showLogButton = new Button(LineAwesomeIcon.FILE_ALT_SOLID.create());
+            showLogButton.addClickListener(event -> {
+
+                Dialog dialog = new Dialog();
+                dialog.setWidth("400px");
+                H3 title = new H3("Log for Task: " + task.getName());
+                UnorderedList ul = new UnorderedList();
+                if (task.getLogLines() != null) {
+                    for (String line : task.getLogLines()) {
+                        ul.add(new ListItem(line));
+                    }
+                }
+
+                Button close = new Button("Close", e -> dialog.close());
+
+                dialog.add(title, ul, close);
+                dialog.open();
+            });
+            return showLogButton;
+        }).setHeader("Log");
     }
 
 
@@ -260,7 +305,7 @@ public class TaskDashboard extends VerticalLayout {
                     try {
                         int page = query.getOffset() / query.getLimit();
                         Pageable pageable = PageRequest.of(page, query.getLimit());
-                        Page<TaskInfo> result = taskManager.getTasksByStatus(status, pageable);
+                        Page<TaskInfo> result = taskomirService.getTasksByStatus(status, pageable);
                         return result.getContent().stream();
                     } catch (IndexOutOfBoundsException e) {
                         getUI().ifPresent(ui -> ui.access(this::refreshAll));
@@ -269,7 +314,7 @@ public class TaskDashboard extends VerticalLayout {
                 },
                 (Query<TaskInfo, Void> query) -> {
                     Pageable pageable = PageRequest.of(0, 1);
-                    int count = (int) taskManager.getTasksByStatus(status, pageable).getTotalElements();
+                    int count = (int) taskomirService.getTasksByStatus(status, pageable).getTotalElements();
                     countUpdater.accept(count);
                     return count;
                 }
@@ -277,13 +322,13 @@ public class TaskDashboard extends VerticalLayout {
     }
 
     private void addScheduledTask(String cronExpression) {
-        taskManager.createScheduledTask("Scheduled task", new SampleScheduledTask(), cronExpression, true);
+        taskomirService.createScheduledTask("Scheduled task", new SampleScheduledTask(), cronExpression, true);
     }
 
     private void addNewTask() {
-        taskManager.enqueue(messageSource.getMessage("ui.simpleTaskName", null, LocaleContextHolder.getLocale()), progress -> {
+        taskomirService.enqueue(messageSource.getMessage("ui.simpleTaskName", null, LocaleContextHolder.getLocale()), progress -> {
             for (int i = 0; i <= 100; i++) {
-                progress.update(i / 100.0);
+                progress.update(i / 100.0, "");
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {
@@ -294,9 +339,9 @@ public class TaskDashboard extends VerticalLayout {
     }
 
     private void addErrorTask() {
-        taskManager.enqueue(messageSource.getMessage("ui.errorTaskName", null, LocaleContextHolder.getLocale()), progress -> {
+        taskomirService.enqueue(messageSource.getMessage("ui.errorTaskName", null, LocaleContextHolder.getLocale()), progress -> {
             for (int i = 0; i <= 100; i++) {
-                progress.update(i / 100.0);
+                progress.update(i / 100.0, "");
                 try {
                     Thread.sleep(100);
                 } catch (InterruptedException e) {

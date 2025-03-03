@@ -3,17 +3,18 @@ package net.urosk.taskomir.core.ui;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.progressbar.ProgressBar;
-import net.urosk.taskomir.core.service.TaskManagerService;
+import net.urosk.taskomir.core.service.TaskomirService;
 
 
 public class SingleTaskProgressComponent extends VerticalLayout {
 
-    private final TaskManagerService taskManager;
+    private final TaskomirService taskomirService;
     private final ProgressBar progressBar;
     private final Span progressLabel;
 
-    public SingleTaskProgressComponent(TaskManagerService taskManager) {
-        this.taskManager = taskManager;
+    public SingleTaskProgressComponent(TaskomirService taskomirService) {
+
+        this.taskomirService = taskomirService;
 
         // Inicializacija UI elementov
         progressBar = createProgressBar();
@@ -22,7 +23,7 @@ public class SingleTaskProgressComponent extends VerticalLayout {
         add(progressLabel, progressBar);
 
         // Zagon naloge
-   //     startTask();
+        //     startTask();
     }
 
     private ProgressBar createProgressBar() {

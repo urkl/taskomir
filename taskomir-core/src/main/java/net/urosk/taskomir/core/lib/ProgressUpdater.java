@@ -2,25 +2,27 @@ package net.urosk.taskomir.core.lib;
 
 
 import lombok.extern.slf4j.Slf4j;
-import net.urosk.taskomir.core.service.TaskManagerService;
+import net.urosk.taskomir.core.service.TaskLifecycleService;
+
 
 @Slf4j
 public class ProgressUpdater {
 
     private final TaskInfo taskInfo;
-    private final TaskManagerService taskManager;
+    private final TaskLifecycleService taskLifecycleService;
 
-    public ProgressUpdater(TaskInfo taskInfo, TaskManagerService taskManager) {
+    public ProgressUpdater(TaskInfo taskInfo, TaskLifecycleService taskLifecycleService) {
         this.taskInfo = taskInfo;
-        this.taskManager = taskManager;
+        this.taskLifecycleService = taskLifecycleService;
     }
 
-    public void update(double progress) {
+    public void update(double progress, String progressText) {
         if (progress < 0.0 || progress > 1.0) {
             throw new IllegalArgumentException("Progress should be between 0.0 in 1.0");
         }
         taskInfo.setProgress(progress);
-        taskManager.updateTask(taskInfo, TaskStatus.PROCESSING, true);
+        taskInfo.setCurrentProgress(progressText);
+        taskLifecycleService.updateTask(taskInfo, TaskStatus.PROCESSING, true);
      //   log.info("Napredek za task {}: {}%", taskInfo.getId(), (int) (progress * 100));
     }
 }

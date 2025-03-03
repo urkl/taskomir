@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 public interface TaskInfoRepository extends MongoRepository<TaskInfo, String> {
 
@@ -17,4 +18,5 @@ public interface TaskInfoRepository extends MongoRepository<TaskInfo, String> {
     void deleteByStatus(TaskStatus taskStatus);
     List<TaskInfo> findByStatusOrderByCreatedAtDesc(TaskStatus taskStatus);
     List<TaskInfo> findByParentIdAndStatusIn(String id, List<TaskStatus> list);
+    Optional<TaskInfo> findByNameAndStatus(String name, TaskStatus status);
 }

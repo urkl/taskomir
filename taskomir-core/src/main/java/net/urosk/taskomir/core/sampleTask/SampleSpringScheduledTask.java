@@ -3,8 +3,10 @@ package net.urosk.taskomir.core.sampleTask;
 
 import net.urosk.taskomir.core.lib.AbstractScheduledTask;
 import net.urosk.taskomir.core.lib.ProgressUpdater;
+import org.springframework.stereotype.Component;
 
-public class SampleScheduledTask extends AbstractScheduledTask {
+@Component
+public class SampleSpringScheduledTask extends AbstractScheduledTask {
     @Override
     protected void runScheduledLogic(ProgressUpdater updater) throws Exception {
 
@@ -17,7 +19,7 @@ public class SampleScheduledTask extends AbstractScheduledTask {
             }
 
             double progress = i / 100.0;
-            updater.update(progress,"Progress: " + i + "%");
+            updater.update(progress,"");
 
             try {
                 Thread.sleep(200); // simulacija dela
