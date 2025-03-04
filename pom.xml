@@ -14,7 +14,7 @@
 
     <groupId>net.urosk.taskomir</groupId>
     <artifactId>taskomir-parent</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <packaging>pom</packaging>
 
     <name>Taskomir Parent</name>
