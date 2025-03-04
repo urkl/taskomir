@@ -53,8 +53,10 @@
 
         <defaultGoal>spring-boot:run</defaultGoal>
         <plugins>
-            <!-- Uporabimo plugin-e, brez verzij, saj so v pluginManagement starša -->
+
+
             <plugin>
+
                 <groupId>com.vaadin</groupId>
                 <artifactId>vaadin-maven-plugin</artifactId>
                 <executions>

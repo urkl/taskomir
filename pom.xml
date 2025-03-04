@@ -35,23 +35,38 @@
     </scm>
     <developers>
         <developer>
-            <id>vaš_id</id>
+            <id>33</id>
             <name>Uroš Kristan</name>
             <email>uros.kristan@gmail.com</email>
         </developer>
     </developers>
+
     <distributionManagement>
+
         <repository>
-            <id>sonna</id>
+            <id>central</id>
             <name>OSSRH Releases</name>
             <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
-
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
         </repository>
+
         <snapshotRepository>
-            <id>sonna</id>
+            <id>central</id>
             <name>OSSRH Snapshots</name>
-            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+            <url>https://central.sonatype.com/repository/maven-snapshots/</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
         </snapshotRepository>
+
     </distributionManagement>
     <!-- Vključimo module -->
     <modules>
@@ -85,15 +100,61 @@
     <!-- Nastavimo verzije pluginov, da otrok ne opozarja na 'missing plugin version' -->
     <build>
 
+        <plugins>
 
-        <pluginManagement>
-            <plugins>
-                <!-- Gitflow plugin (iz amashchenko) -->
                 <plugin>
                     <groupId>com.amashchenko.maven.plugin</groupId>
                     <artifactId>gitflow-maven-plugin</artifactId>
-                    <version>${amascenko.version}</version>
+                    <version>1.21.0</version>
+                    <configuration>
+                        <!-- optional configuration -->
+                    </configuration>
+                </plugin>
 
+            <plugin>
+                <groupId>org.sonatype.central</groupId>
+                <artifactId>central-publishing-maven-plugin</artifactId>
+                <version>0.7.0</version>
+                <extensions>true</extensions>
+                <configuration>
+                    <publishingServerId>central</publishingServerId>
+                </configuration>
+            </plugin>
+            <plugin>
+                <artifactId>maven-deploy-plugin</artifactId>
+                <configuration>
+                    <skip>true</skip>
+                </configuration>
+            </plugin>
+        </plugins>
+        <pluginManagement>
+            <plugins>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-gpg-plugin</artifactId>
+                    <version>3.1.0</version>
+                    <executions>
+                        <execution>
+                            <id>sign-artifacts</id>
+                            <phase>verify</phase>
+                            <goals>
+                                <goal>sign</goal>
+                            </goals>
+                            <configuration>
+                                <gpgArguments>
+                                    <arg>--pinentry-mode</arg>
+                                    <arg>loopback</arg>
+                                </gpgArguments>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.1.3</version>
                 </plugin>
 
                 <!-- Maven compiler plugin -->

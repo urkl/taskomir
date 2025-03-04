@@ -71,7 +71,7 @@ Of course, you can use any other database, just implement the TaskRepository int
    cd taskomir-demo
    mvn spring-boot:run
    ```
-    - Access the Vaadin UI at `http://localhost:8080`.
+    - Access the Vaadin UI at `http://localhost:8888`.
 
 4. **Integrate the Core Library**
     - Include the published `taskomir-core` artifact in your Maven (or Gradle) project, and follow the usage examples to enqueue tasks, manage schedules, etc.

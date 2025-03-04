@@ -8,10 +8,9 @@ public class SampleScheduledTask extends AbstractScheduledTask {
     @Override
     protected void runScheduledLogic(ProgressUpdater updater) throws Exception {
 
-        // Začetek zanke
         for (int i = 0; i <= 100; i++) {
 
-            // Preveri, če je thread prekinjen
+
             if (Thread.currentThread().isInterrupted()) {
                 throw new InterruptedException("Task canceled");
             }
