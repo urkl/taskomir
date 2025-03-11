@@ -76,6 +76,24 @@ Of course, you can use any other database, just implement the TaskRepository int
 4. **Integrate the Core Library**
     - Include the published `taskomir-core` artifact in your Maven (or Gradle) project, and follow the usage examples to enqueue tasks, manage schedules, etc.
 
+## Build
+
+### Start new release
+   ```bash
+   mvn gitflow:release-start
+   ```
+### Deploy artifacts
+   ```bash
+   
+   mvn clean deploy -Pproduction
+   
+   ```
+### Finish release
+   ```bash
+   
+   
+   mvn gitflow:release-finish
+   ```
 ## Contributing
 
 Contributions and pull requests are welcome! To contribute:

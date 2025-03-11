@@ -4,11 +4,13 @@ import lombok.extern.slf4j.Slf4j;
 import net.urosk.taskomir.core.lib.ProgressTask;
 import net.urosk.taskomir.core.lib.TaskInfo;
 import net.urosk.taskomir.core.lib.TaskStatus;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Javna fasada (API), prek katere drugi projekti uporabljajo Taskomir funkcionalnost.
@@ -42,7 +44,7 @@ public class TaskomirService {
     /**
      * Enkratno pognati ProgressTask (brez crona).
      */
-    public TaskInfo enqueue(String taskName, ProgressTask task) {
+    public CompletableFuture<TaskInfo> enqueue(String taskName, ProgressTask task) {
         log.info("Enqueuing immediate task: name={}", taskName);
         return taskLifecycleService.enqueue(taskName, task);
     }
