@@ -7,11 +7,11 @@ import net.urosk.taskomir.core.service.TaskomirService;
 import net.urosk.taskomir.core.ui.TaskDashboard;
 import org.springframework.context.MessageSource;
 
-@Route("dashboard")
+@Route("")
 public class TaskomirDashboard extends VerticalLayout {
 
     public TaskomirDashboard(TaskomirService taskomirService, MessageSource messageSource) {
-        TaskDashboard allTasksComponent = new TaskDashboard(taskomirService, messageSource);
+        TaskDashboard allTasksComponent = new TaskDashboard(taskomirService, messageSource,true);
         add(allTasksComponent);
     }
 }

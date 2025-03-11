@@ -7,23 +7,23 @@
     <parent>
         <groupId>net.urosk.taskomir</groupId>
         <artifactId>taskomir-parent</artifactId>
-        <version>1.0.3</version>
+        <version>1.0.4</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>taskomir-core</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>jar</packaging>
 
     <name>Taskomir core</name>
     <description>Core library for Taskomir (background tasks, scheduling, etc.)</description>
-
 
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-mongodb</artifactId>
@@ -34,38 +34,39 @@
             <artifactId>lombok</artifactId>
             <scope>provided</scope>
         </dependency>
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-core</artifactId>
         </dependency>
+
         <dependency>
             <groupId>com.vaadin</groupId>
             <artifactId>vaadin-spring-boot-starter</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.parttio</groupId>
             <artifactId>line-awesome</artifactId>
             <version>2.1.0</version>
         </dependency>
+
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
-<!--        <dependency>-->
-<!--            <groupId>org.springframework.boot</groupId>-->
-<!--            <artifactId>spring-boot-starter-data-jpa</artifactId>-->
-<!--        </dependency>-->
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-validation</artifactId>
         </dependency>
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
-
 
         <dependency>
             <groupId>org.mockito</groupId>
@@ -88,7 +89,6 @@
                     <publishingServerId>central</publishingServerId>
                 </configuration>
             </plugin>
-
 <!--
 The flatten-maven-plugin with <flattenMode>ossrh</flattenMode> ensures:
 Maven Central Compliance: The flattened POM (used during deployment) explicitly includes all dependency versions, resolving placeholders like ${project.version}. This is mandatory for OSSRH (Maven Central’s repository hosting).
@@ -109,7 +109,7 @@ Avoids "Missing Version" Errors: Without flattening, Maven Central rejects deplo
                         </goals>
                         <configuration>
                             <updatePomFile>true</updatePomFile>
-                            <flattenMode>ossrh</flattenMode> <!-- Change to ossrh -->
+                            <flattenMode>ossrh</flattenMode> <!-- This is crucial for ossrh -->
                         </configuration>
                     </execution>
                 </executions>

@@ -4,7 +4,6 @@
                              http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -14,7 +13,7 @@
 
     <groupId>net.urosk.taskomir</groupId>
     <artifactId>taskomir-parent</artifactId>
-    <version>1.0.3</version>
+    <version>1.0.4</version>
     <packaging>pom</packaging>
 
     <name>Taskomir Parent</name>
@@ -105,10 +104,20 @@
     </properties>
 
 
-    <!-- Nastavimo verzije pluginov, da otrok ne opozarja na 'missing plugin version' -->
     <build>
-
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-dependency-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>analyze</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
 
             <plugin>
                 <groupId>com.amashchenko.maven.plugin</groupId>
@@ -120,13 +129,9 @@
                     </gitFlowConfig>
                 </configuration>
             </plugin>
-
-
         </plugins>
         <pluginManagement>
             <plugins>
-
-
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
@@ -134,23 +139,21 @@
                     <configuration>
                         <skip>true</skip>
                     </configuration>
-
                 </plugin>
 
-                <!-- Maven compiler plugin -->
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.10.1</version>
                 </plugin>
 
-                <!-- Spring Boot plugin; verzijo običajno deduje iz spring-boot-starter-parent -->
+
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
                 </plugin>
 
-                <!-- Vaadin plugin, da ni treba ponavljati verzije v child modulih -->
+
                 <plugin>
                     <groupId>com.vaadin</groupId>
                     <artifactId>vaadin-maven-plugin</artifactId>

@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -71,7 +72,7 @@ public class TaskLifecycleService {
     /**
      * Za enkraten zagon brez crona.
      */
-    public TaskInfo enqueue(String taskName, ProgressTask task) {
+    public CompletableFuture<TaskInfo> enqueue(String taskName, ProgressTask task) {
         String taskId = UUID.randomUUID().toString();
 
         TaskInfo taskInfo = new TaskInfo(taskId, taskName);
@@ -79,22 +80,26 @@ public class TaskLifecycleService {
         taskInfo.setStatus(TaskStatus.ENQUEUED);
         repository.save(taskInfo);
 
-        // Ko se dejansko zažene
-        Future<?> future = executorService.submit(() -> {
+
+        CompletableFuture<TaskInfo> future = CompletableFuture.supplyAsync(() -> {
             updateTask(taskInfo, TaskStatus.PROCESSING, true);
             try {
                 ProgressUpdater updater = new ProgressUpdater(taskInfo, this);
                 task.execute(updater);
                 taskInfo.setProgress(1.0);
                 updateTask(taskInfo, TaskStatus.SUCCEEDED, false);
+                return taskInfo; // Vrne TaskInfo
             } catch (Exception e) {
                 updateTask(taskInfo, TaskStatus.FAILED, false, e.getMessage());
             }
-        });
+
+            return taskInfo;
+
+        }, executorService);
 
         runningTasks.put(taskId, future);
         log.info("Enqueued task {}", taskId);
-        return taskInfo;
+        return future;
     }
 
     /**
@@ -276,6 +281,6 @@ public class TaskLifecycleService {
     }
 
     public Optional<TaskInfo> findByNameAndStatus(String taskName, TaskStatus taskStatus) {
-            return repository.findByNameAndStatus(taskName, taskStatus);
+        return repository.findByNameAndStatus(taskName, taskStatus);
     }
 }

@@ -40,8 +40,7 @@ import static com.vaadin.flow.component.grid.GridVariant.LUMO_COMPACT;
 
 public class TaskDashboard extends VerticalLayout {
 
-    private static final DateTimeFormatter SL_FORMATTER =
-            DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", new Locale("sl", "SI"));
+    private static final DateTimeFormatter SL_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss", new Locale("sl", "SI"));
     private final TaskomirService taskomirService;
     private final MessageSource messageSource;
 
@@ -53,92 +52,71 @@ public class TaskDashboard extends VerticalLayout {
     private final Grid<TaskInfo> failedGrid = new Grid<>(TaskInfo.class, false);
     private final Grid<TaskInfo> deletedGrid = new Grid<>(TaskInfo.class, false);
 
-    public TaskDashboard(TaskomirService taskomirService, MessageSource messageSource) {
+    public TaskDashboard(TaskomirService taskomirService, MessageSource messageSource, boolean showSampleTasks) {
         this.taskomirService = taskomirService;
         this.messageSource = messageSource;
 
         HorizontalLayout buttons = new HorizontalLayout();
         buttons.setSpacing(true);
+        if (showSampleTasks) {
+            // Pridobi sporočila iz MessageSource
+            String addTaskText = messageSource.getMessage("ui.addTask", null, LocaleContextHolder.getLocale());
+            String addErrorTaskText = messageSource.getMessage("ui.addErrorTask", null, LocaleContextHolder.getLocale());
+            String addScheduledTaskText = messageSource.getMessage("ui.addScheduledTask", null, LocaleContextHolder.getLocale());
 
-        // Pridobi sporočila iz MessageSource
-        String addTaskText = messageSource.getMessage("ui.addTask", null, LocaleContextHolder.getLocale());
-        String addErrorTaskText = messageSource.getMessage("ui.addErrorTask", null, LocaleContextHolder.getLocale());
-        String addScheduledTaskText = messageSource.getMessage("ui.addScheduledTask", null, LocaleContextHolder.getLocale());
+            Button addTaskButton = new Button(addTaskText, event -> addNewTask());
+            Button addErrorTaskButton = new Button(addErrorTaskText, event -> addErrorTask());
 
-        Button addTaskButton = new Button(addTaskText, event -> addNewTask());
-        Button addErrorTaskButton = new Button(addErrorTaskText, event -> addErrorTask());
+            CronField cronField = new CronField();
 
-        CronField cronField = new CronField();
+            Button addScheduledTaskButton = new Button(addScheduledTaskText, event -> addScheduledTask(cronField.getValue()));
+            Button addScheduledTaskButton2 = new Button(addScheduledTaskText, event -> addScheduledTaskSpring(cronField.getValue()));
 
-        Button addScheduledTaskButton = new Button(addScheduledTaskText, event -> addScheduledTask(cronField.getValue()));
-        Button addScheduledTaskButton2 = new Button(addScheduledTaskText, event -> addScheduledTaskSpring(cronField.getValue()));
-
-        buttons.add(addTaskButton, addErrorTaskButton, cronField, addScheduledTaskButton, addScheduledTaskButton2);
-        add(buttons);
-
+            buttons.add(addTaskButton, addErrorTaskButton, cronField, addScheduledTaskButton, addScheduledTaskButton2);
+            add(buttons);
+        }
         // Dodaj ločilno črto
         add(new Hr());
 
 
         // SCHEDULED tasks
         H3 scheduledCounter = new H3("0");
-        add(getHeader(LineAwesomeIcon.CALENDAR_ALT,
-                messageSource.getMessage("ui.scheduledHeader", null, LocaleContextHolder.getLocale()),
-                "var(--lumo-primary-color)", scheduledCounter));
+        add(getHeader(LineAwesomeIcon.CALENDAR_ALT, messageSource.getMessage("ui.scheduledHeader", null, LocaleContextHolder.getLocale()), "var(--lumo-primary-color)", scheduledCounter));
         configureDefaultColumns(scheduledGrid, false, true, false, true);
         scheduledGrid.setDataProvider(createDataProvider(TaskStatus.SCHEDULED, count -> scheduledCounter.setText(String.valueOf(count))));
         add(scheduledGrid);
 
         // ENQUEUED tasks
         H3 enqueuedCounter = new H3("0");
-        add(getHeader(LineAwesomeIcon.TASKS_SOLID,
-                messageSource.getMessage("ui.enqueuedHeader", null, LocaleContextHolder.getLocale()),
-                "var(--lumo-primary-color)", enqueuedCounter,
-                new Button(messageSource.getMessage("ui.cleanEnqueued", null, LocaleContextHolder.getLocale()),
-                        event -> taskomirService.deleteTasksByStatus(TaskStatus.ENQUEUED))));
+        add(getHeader(LineAwesomeIcon.TASKS_SOLID, messageSource.getMessage("ui.enqueuedHeader", null, LocaleContextHolder.getLocale()), "var(--lumo-primary-color)", enqueuedCounter, new Button(messageSource.getMessage("ui.cleanEnqueued", null, LocaleContextHolder.getLocale()), event -> taskomirService.deleteTasksByStatus(TaskStatus.ENQUEUED))));
         configureDefaultColumns(enqueuedGrid, false, true, false, false);
         enqueuedGrid.setDataProvider(createDataProvider(TaskStatus.ENQUEUED, count -> enqueuedCounter.setText(String.valueOf(count))));
         add(enqueuedGrid);
 
         // PROCESSING tasks
         H3 processingCounter = new H3("0");
-        add(getHeader(LineAwesomeIcon.RUNNING_SOLID,
-                messageSource.getMessage("ui.processingHeader", null, LocaleContextHolder.getLocale()),
-                "var(--lumo-primary-color)", processingCounter));
+        add(getHeader(LineAwesomeIcon.RUNNING_SOLID, messageSource.getMessage("ui.processingHeader", null, LocaleContextHolder.getLocale()), "var(--lumo-primary-color)", processingCounter));
         configureDefaultColumns(processingGrid, true, true, false, false);
         processingGrid.setDataProvider(createDataProvider(TaskStatus.PROCESSING, count -> processingCounter.setText(String.valueOf(count))));
         add(processingGrid);
 
         // SUCCEEDED tasks
         H3 succeededCounter = new H3("0");
-        add(getHeader(LineAwesomeIcon.CHECK_CIRCLE,
-                messageSource.getMessage("ui.succeededHeader", null, LocaleContextHolder.getLocale()),
-                "var(--lumo-success-color)", succeededCounter,
-                new Button(messageSource.getMessage("ui.cleanSucceeded", null, LocaleContextHolder.getLocale()),
-                        event -> taskomirService.deleteTasksByStatus(TaskStatus.SUCCEEDED))));
+        add(getHeader(LineAwesomeIcon.CHECK_CIRCLE, messageSource.getMessage("ui.succeededHeader", null, LocaleContextHolder.getLocale()), "var(--lumo-success-color)", succeededCounter, new Button(messageSource.getMessage("ui.cleanSucceeded", null, LocaleContextHolder.getLocale()), event -> taskomirService.deleteTasksByStatus(TaskStatus.SUCCEEDED))));
         configureDefaultColumns(succeededGrid, false, false, false, false);
         succeededGrid.setDataProvider(createDataProvider(TaskStatus.SUCCEEDED, count -> succeededCounter.setText(String.valueOf(count))));
         add(succeededGrid);
 
         // FAILED tasks
         H3 failedCounter = new H3("0");
-        add(getHeader(LineAwesomeIcon.TIMES_CIRCLE,
-                        messageSource.getMessage("ui.failedHeader", null, LocaleContextHolder.getLocale()),
-                        "var(--lumo-error-color)", failedCounter),
-                new Button(messageSource.getMessage("ui.cleanFailed", null, LocaleContextHolder.getLocale()),
-                        event -> taskomirService.deleteTasksByStatus(TaskStatus.FAILED)));
+        add(getHeader(LineAwesomeIcon.TIMES_CIRCLE, messageSource.getMessage("ui.failedHeader", null, LocaleContextHolder.getLocale()), "var(--lumo-error-color)", failedCounter), new Button(messageSource.getMessage("ui.cleanFailed", null, LocaleContextHolder.getLocale()), event -> taskomirService.deleteTasksByStatus(TaskStatus.FAILED)));
         configureDefaultColumns(failedGrid, false, false, true, false);
         failedGrid.setDataProvider(createDataProvider(TaskStatus.FAILED, count -> failedCounter.setText(String.valueOf(count))));
         add(failedGrid);
 
         // DELETED tasks
         H3 deletedCounter = new H3("0");
-        add(getHeader(LineAwesomeIcon.TRASH_ALT,
-                        messageSource.getMessage("ui.deletedHeader", null, LocaleContextHolder.getLocale()),
-                        "var(--lumo-error-color)"),
-                deletedCounter,
-                new Button(messageSource.getMessage("ui.cleanDeleted", null, LocaleContextHolder.getLocale()),
-                        event -> taskomirService.deleteTasksByStatus(TaskStatus.DELETED)));
+        add(getHeader(LineAwesomeIcon.TRASH_ALT, messageSource.getMessage("ui.deletedHeader", null, LocaleContextHolder.getLocale()), "var(--lumo-error-color)"), deletedCounter, new Button(messageSource.getMessage("ui.cleanDeleted", null, LocaleContextHolder.getLocale()), event -> taskomirService.deleteTasksByStatus(TaskStatus.DELETED)));
         configureDefaultColumns(deletedGrid, false, false, false, false);
         deletedGrid.setDataProvider(createDataProvider(TaskStatus.DELETED, count -> deletedCounter.setText(String.valueOf(count))));
         add(deletedGrid);
@@ -180,20 +158,16 @@ public class TaskDashboard extends VerticalLayout {
 
         grid.addThemeVariants(LUMO_COMPACT, GridVariant.LUMO_WRAP_CELL_CONTENT);
 
-        grid.addColumn(TaskInfo::getId)
-                .setHeader(messageSource.getMessage("grid.column.id", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(TaskInfo::getId).setHeader(messageSource.getMessage("grid.column.id", null, LocaleContextHolder.getLocale()));
 
-        grid.addColumn(TaskInfo::getName)
-                .setHeader(messageSource.getMessage("grid.column.name", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(TaskInfo::getName).setHeader(messageSource.getMessage("grid.column.name", null, LocaleContextHolder.getLocale()));
 
         grid.addColumn(task -> {
-                    if (task.getClassName() == null) return "";
-                    return task.getClassName().substring(task.getClassName().lastIndexOf('.') + 1);
-                }
-        ).setHeader(messageSource.getMessage("grid.column.type", null, LocaleContextHolder.getLocale()));
+            if (task.getClassName() == null) return "";
+            return task.getClassName().substring(task.getClassName().lastIndexOf('.') + 1);
+        }).setHeader(messageSource.getMessage("grid.column.type", null, LocaleContextHolder.getLocale()));
 
-        grid.addColumn(task -> task.getProgress() * 100 + "%")
-                .setHeader(messageSource.getMessage("grid.column.progress", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(task -> task.getProgress() * 100 + "%").setHeader(messageSource.getMessage("grid.column.progress", null, LocaleContextHolder.getLocale()));
 
         if (showProgressBar) {
 
@@ -203,76 +177,52 @@ public class TaskDashboard extends VerticalLayout {
                 return progressBar;
             }).setHeader(messageSource.getMessage("grid.column.progress", null, LocaleContextHolder.getLocale()));
 
-            grid.addColumn(TaskInfo::getCurrentProgress
-            ).setHeader(messageSource.getMessage("grid.column.progressText", null, LocaleContextHolder.getLocale()));
+            grid.addColumn(TaskInfo::getCurrentProgress).setHeader(messageSource.getMessage("grid.column.progressText", null, LocaleContextHolder.getLocale()));
         }
 
 
-        grid.addColumn(task -> task.getStatus().toString())
-                .setHeader(messageSource.getMessage("grid.column.status", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(task -> task.getStatus().toString()).setHeader(messageSource.getMessage("grid.column.status", null, LocaleContextHolder.getLocale()));
 
-        grid.addColumn(task ->
-                LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getCreatedAt()), ZoneId.systemDefault())
-                        .format(SL_FORMATTER)
-        ).setHeader(messageSource.getMessage("grid.column.created", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(task -> LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getCreatedAt()), ZoneId.systemDefault()).format(SL_FORMATTER)).setHeader(messageSource.getMessage("grid.column.created", null, LocaleContextHolder.getLocale()));
 
 
-        grid.addColumn(task ->
-                task.getStartedAt() != null ?
-                        LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getStartedAt()), ZoneId.systemDefault())
-                                .format(SL_FORMATTER) : ""
-        ).setHeader(messageSource.getMessage("grid.column.started", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(task -> task.getStartedAt() != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getStartedAt()), ZoneId.systemDefault()).format(SL_FORMATTER) : "").setHeader(messageSource.getMessage("grid.column.started", null, LocaleContextHolder.getLocale()));
 
-        grid.addColumn(task ->
-                task.getEndedAt() != null ?
-                        LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getEndedAt()), ZoneId.systemDefault())
-                                .format(SL_FORMATTER) : ""
-        ).setHeader(messageSource.getMessage("grid.column.ended", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(task -> task.getEndedAt() != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getEndedAt()), ZoneId.systemDefault()).format(SL_FORMATTER) : "").setHeader(messageSource.getMessage("grid.column.ended", null, LocaleContextHolder.getLocale()));
 
-        grid.addColumn(task ->
-                task.getLastRunTime() != null ?
-                        LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getLastRunTime()), ZoneId.systemDefault())
-                                .format(SL_FORMATTER) : ""
-        ).setHeader(messageSource.getMessage("grid.column.lastRun", null, LocaleContextHolder.getLocale()));
-        grid.addColumn(TaskInfo::getCronExpression)
-                .setHeader(messageSource.getMessage("grid.column.cron", null, LocaleContextHolder.getLocale()));
-        grid.addColumn(TaskInfo::getParentId)
-                .setHeader(messageSource.getMessage("grid.column.parent", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(task -> task.getLastRunTime() != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getLastRunTime()), ZoneId.systemDefault()).format(SL_FORMATTER) : "").setHeader(messageSource.getMessage("grid.column.lastRun", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(TaskInfo::getCronExpression).setHeader(messageSource.getMessage("grid.column.cron", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(TaskInfo::getParentId).setHeader(messageSource.getMessage("grid.column.parent", null, LocaleContextHolder.getLocale()));
 
         if (addError)
-            grid.addColumn(task -> task.getError() != null ? task.getError() : "")
-                    .setHeader(messageSource.getMessage("grid.column.error", null, LocaleContextHolder.getLocale()));
+            grid.addColumn(task -> task.getError() != null ? task.getError() : "").setHeader(messageSource.getMessage("grid.column.error", null, LocaleContextHolder.getLocale()));
 
         if (addKillButton) {
             grid.addComponentColumn(task -> {
-                        Button killButton = new Button(LineAwesomeIcon.SKULL_CROSSBONES_SOLID.create());
-                        killButton.addThemeVariants(LUMO_ERROR, LUMO_PRIMARY, LUMO_ICON);
-                        killButton.addClickListener(e -> {
-                            UI.getCurrent().access(() -> {
-                                boolean canceled = taskomirService.cancelTask(task.getId());
-                                refreshAll();
-                            });
-                        });
-                        return killButton;
-                    }).setHeader(messageSource.getMessage("grid.column.kill", null, LocaleContextHolder.getLocale()))
-                    .setAutoWidth(true)
-                    .setFlexGrow(0);
+                Button killButton = new Button(LineAwesomeIcon.SKULL_CROSSBONES_SOLID.create());
+                killButton.addThemeVariants(LUMO_ERROR, LUMO_PRIMARY, LUMO_ICON);
+                killButton.addClickListener(e -> {
+                    UI.getCurrent().access(() -> {
+                        boolean canceled = taskomirService.cancelTask(task.getId());
+                        refreshAll();
+                    });
+                });
+                return killButton;
+            }).setHeader(messageSource.getMessage("grid.column.kill", null, LocaleContextHolder.getLocale())).setAutoWidth(true).setFlexGrow(0);
         }
 
         if (addExecuteNowButton) {
             grid.addComponentColumn(task -> {
-                        Button executeNowButton = new Button(LineAwesomeIcon.PLAY_CIRCLE.create());
-                        executeNowButton.addThemeVariants(LUMO_SUCCESS, LUMO_ICON, LUMO_PRIMARY);
-                        executeNowButton.addClickListener(e -> {
-                            UI.getCurrent().access(() -> {
-                                taskomirService.enqueueNewChildOf(task);
-                                refreshAll();
-                            });
-                        });
-                        return executeNowButton;
-                    }).setHeader(messageSource.getMessage("grid.column.execute", null, LocaleContextHolder.getLocale()))
-                    .setAutoWidth(true)
-                    .setFlexGrow(0);
+                Button executeNowButton = new Button(LineAwesomeIcon.PLAY_CIRCLE.create());
+                executeNowButton.addThemeVariants(LUMO_SUCCESS, LUMO_ICON, LUMO_PRIMARY);
+                executeNowButton.addClickListener(e -> {
+                    UI.getCurrent().access(() -> {
+                        taskomirService.enqueueNewChildOf(task);
+                        refreshAll();
+                    });
+                });
+                return executeNowButton;
+            }).setHeader(messageSource.getMessage("grid.column.execute", null, LocaleContextHolder.getLocale())).setAutoWidth(true).setFlexGrow(0);
         }
 
         grid.addComponentColumn(task -> {
@@ -300,25 +250,22 @@ public class TaskDashboard extends VerticalLayout {
 
 
     private DataProvider<TaskInfo, Void> createDataProvider(TaskStatus status, Consumer<Integer> countUpdater) {
-        return DataProvider.fromCallbacks(
-                (Query<TaskInfo, Void> query) -> {
-                    try {
-                        int page = query.getOffset() / query.getLimit();
-                        Pageable pageable = PageRequest.of(page, query.getLimit());
-                        Page<TaskInfo> result = taskomirService.getTasksByStatus(status, pageable);
-                        return result.getContent().stream();
-                    } catch (IndexOutOfBoundsException e) {
-                        getUI().ifPresent(ui -> ui.access(this::refreshAll));
-                        return Stream.empty();
-                    }
-                },
-                (Query<TaskInfo, Void> query) -> {
-                    Pageable pageable = PageRequest.of(0, 1);
-                    int count = (int) taskomirService.getTasksByStatus(status, pageable).getTotalElements();
-                    countUpdater.accept(count);
-                    return count;
-                }
-        );
+        return DataProvider.fromCallbacks((Query<TaskInfo, Void> query) -> {
+            try {
+                int page = query.getOffset() / query.getLimit();
+                Pageable pageable = PageRequest.of(page, query.getLimit());
+                Page<TaskInfo> result = taskomirService.getTasksByStatus(status, pageable);
+                return result.getContent().stream();
+            } catch (IndexOutOfBoundsException e) {
+                getUI().ifPresent(ui -> ui.access(this::refreshAll));
+                return Stream.empty();
+            }
+        }, (Query<TaskInfo, Void> query) -> {
+            Pageable pageable = PageRequest.of(0, 1);
+            int count = (int) taskomirService.getTasksByStatus(status, pageable).getTotalElements();
+            countUpdater.accept(count);
+            return count;
+        });
     }
 
     private void addScheduledTask(String cronExpression) {
