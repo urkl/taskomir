@@ -17,6 +17,8 @@ public class TaskomirProperties {
     private Duration scheduledCheckInterval= Duration.ofSeconds(15); // 15 seconds
     private int poolSize = 2; // Number of parallel tasks
     private int queueCapacity = 100_000; //Number of tasks in the queue
+    private boolean primary=true;
+    private String instanceId;
 
     public long getCleanupIntervalSeconds() {
         return cleanupInterval.toSeconds();

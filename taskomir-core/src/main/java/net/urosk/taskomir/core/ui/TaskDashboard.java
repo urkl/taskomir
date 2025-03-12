@@ -15,8 +15,9 @@ import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.dom.ThemeList;
 import net.urosk.taskomir.core.config.TaskomirProperties;
+import net.urosk.taskomir.core.domain.AppLock;
+import net.urosk.taskomir.core.domain.TaskInfo;
 import net.urosk.taskomir.core.lib.ConfigEntry;
-import net.urosk.taskomir.core.lib.TaskInfo;
 import net.urosk.taskomir.core.lib.TaskStatus;
 import net.urosk.taskomir.core.sampleTask.SampleScheduledTask;
 import net.urosk.taskomir.core.sampleTask.SampleSpringScheduledTask;
@@ -34,6 +35,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -324,6 +326,7 @@ public class TaskDashboard extends VerticalLayout {
 
         return new Tab(layout);
     }
+
     private String formatDuration(Duration duration) {
         long days = duration.toDays();
         long hours = duration.toHours() % 24;
@@ -335,24 +338,74 @@ public class TaskDashboard extends VerticalLayout {
         if (minutes > 0) return minutes + " min";
         return seconds + " s";
     }
+
     private Component createConfigPanel(TaskomirProperties properties) {
         VerticalLayout configLayout = new VerticalLayout();
         configLayout.setPadding(true);
         configLayout.setSpacing(true);
 
+        // Ugotovimo, ali je instanca primary ali ne
+        boolean isPrimary = properties.isPrimary();
+
+        Optional<AppLock> primary=taskomirService.getExistingPrimary();
+        if(primary.isEmpty()){
+            H2 missing = new H2(messageSource.getMessage("ui.config.primaryMissing", null, LocaleContextHolder.getLocale()));
+            missing.getStyle().set("color", "var(--lumo-error-color)");
+            add(missing);
+        }
+        // Pripravimo lokalizirano sporočilo; npr. "Configuration (PRIMARY)" ali "Configuration (SECONDARY)"
+        String roleSuffix = isPrimary
+                ? messageSource.getMessage("ui.config.primarySuffix", null, LocaleContextHolder.getLocale())
+                : messageSource.getMessage("ui.config.secondarySuffix", null, LocaleContextHolder.getLocale());
+
+        // Sestavimo celoten naslov
+        String headerText = messageSource.getMessage("ui.config.header", null, LocaleContextHolder.getLocale())
+        + " / "+messageSource.getMessage("ui.config.thisInstance", null, LocaleContextHolder.getLocale())
+                + " :: " + roleSuffix;
+
         // Dodaj ikono in barvo v header
         var configHeader = getHeader(LineAwesomeIcon.COG_SOLID,
-                messageSource.getMessage("ui.config.header", null, LocaleContextHolder.getLocale()),
+                messageSource.getMessage(headerText, null, LocaleContextHolder.getLocale()),
                 "var(--lumo-primary-color)");
 
+
+
         Grid<ConfigEntry> configGrid = new Grid<>(ConfigEntry.class, false);
-        configGrid.setItems(
-                new ConfigEntry(messageSource.getMessage("ui.config.cleanupInterval", null, LocaleContextHolder.getLocale()), formatDuration(properties.getCleanupInterval())),
-                new ConfigEntry(messageSource.getMessage("ui.config.succeededRetentionTime", null, LocaleContextHolder.getLocale()), formatDuration(properties.getSucceededRetentionTime())),
-                new ConfigEntry(messageSource.getMessage("ui.config.deletedRetentionTime", null, LocaleContextHolder.getLocale()), formatDuration(properties.getDeletedRetentionTime())),
-                new ConfigEntry(messageSource.getMessage("ui.config.poolSize", null, LocaleContextHolder.getLocale()), String.valueOf(properties.getPoolSize())),
-                new ConfigEntry(messageSource.getMessage("ui.config.queueCapacity", null, LocaleContextHolder.getLocale()), String.valueOf(properties.getQueueCapacity()))
-        );
+        // Najprej poskusimo dobiti PRIMARY lock iz baze.
+        Optional<AppLock> lockOpt = taskomirService.getAppLockByName("PRIMARY");
+        if (lockOpt.isPresent()) {
+            // Če PRIMARY obstaja, uporabljamo lock-ove nastavitve
+            AppLock lock = lockOpt.get();
+
+            configGrid.setItems(
+                    new ConfigEntry(
+                            messageSource.getMessage("ui.config.instanceId", null, LocaleContextHolder.getLocale()),
+                            lock.getInstanceId()
+                    ),
+                    new ConfigEntry(
+                            messageSource.getMessage("ui.config.cleanupInterval", null, LocaleContextHolder.getLocale()),
+                            formatMillisAsDuration(lock.getCleanupIntervalMs())
+                    ),
+                    new ConfigEntry(
+                            messageSource.getMessage("ui.config.succeededRetentionTime", null, LocaleContextHolder.getLocale()),
+                            formatMillisAsDuration(lock.getSucceededRetentionMs())
+                    ),
+                    new ConfigEntry(
+                            messageSource.getMessage("ui.config.deletedRetentionTime", null, LocaleContextHolder.getLocale()),
+                            formatMillisAsDuration(lock.getDeletedRetentionMs())
+                    ),
+                    new ConfigEntry(
+                            messageSource.getMessage("ui.config.poolSize", null, LocaleContextHolder.getLocale()),
+                            String.valueOf(lock.getPoolSize())
+                    ),
+                    new ConfigEntry(
+                            messageSource.getMessage("ui.config.queueCapacity", null, LocaleContextHolder.getLocale()),
+                            String.valueOf(lock.getQueueCapacity())
+                    )
+
+            );
+
+        }
 
         configGrid.addColumn(ConfigEntry::getKey).setHeader(messageSource.getMessage("ui.config.parameter", null, LocaleContextHolder.getLocale()));
         configGrid.addColumn(ConfigEntry::getValue).setHeader(messageSource.getMessage("ui.config.value", null, LocaleContextHolder.getLocale()));
@@ -361,6 +414,9 @@ public class TaskDashboard extends VerticalLayout {
         return configLayout;
     }
 
-
+    private String formatMillisAsDuration(long ms) {
+        Duration d = Duration.ofMillis(ms);
+        return formatDuration(d);
+    }
 
 }

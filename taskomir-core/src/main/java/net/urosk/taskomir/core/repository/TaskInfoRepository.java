@@ -1,7 +1,7 @@
 package net.urosk.taskomir.core.repository;
 
 
-import net.urosk.taskomir.core.lib.TaskInfo;
+import net.urosk.taskomir.core.domain.TaskInfo;
 import net.urosk.taskomir.core.lib.TaskStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

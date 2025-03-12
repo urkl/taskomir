@@ -1,6 +1,7 @@
-package net.urosk.taskomir.core.lib;
+package net.urosk.taskomir.core.domain;
 
 import lombok.Data;
+import net.urosk.taskomir.core.lib.TaskStatus;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 

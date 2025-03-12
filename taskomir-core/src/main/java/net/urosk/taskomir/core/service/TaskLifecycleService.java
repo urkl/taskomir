@@ -1,6 +1,7 @@
 package net.urosk.taskomir.core.service;
 
 import lombok.extern.slf4j.Slf4j;
+import net.urosk.taskomir.core.domain.TaskInfo;
 import net.urosk.taskomir.core.lib.*;
 import net.urosk.taskomir.core.repository.TaskInfoRepository;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
