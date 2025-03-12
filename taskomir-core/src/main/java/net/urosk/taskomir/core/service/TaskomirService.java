@@ -1,6 +1,8 @@
 package net.urosk.taskomir.core.service;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import net.urosk.taskomir.core.config.TaskomirProperties;
 import net.urosk.taskomir.core.lib.ProgressTask;
 import net.urosk.taskomir.core.lib.TaskInfo;
 import net.urosk.taskomir.core.lib.TaskStatus;
@@ -21,8 +23,12 @@ public class TaskomirService {
 
     private final TaskLifecycleService taskLifecycleService;
 
-    public TaskomirService(TaskLifecycleService taskLifecycleService) {
+
+    @Getter
+    private final TaskomirProperties   taskomirProperties;
+    public TaskomirService(TaskLifecycleService taskLifecycleService, TaskomirProperties taskomirProperties) {
         this.taskLifecycleService = taskLifecycleService;
+        this.taskomirProperties = taskomirProperties;
     }
 
     /**

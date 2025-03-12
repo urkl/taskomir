@@ -15,9 +15,9 @@ server:
 
 
 taskomir:
-  cleanupIntervalMs: 15000            # Clean every 15 seconds
-  succeededRetentionTimeMs: 800000 # Move succeeded jobs to deleted after 800 seconds
-  deletedRetentionTimeMs: 6000000   # Delete deleted jobs after 6000 seconds
+  cleanupInterval: 30s
+  succeededRetentionTime: 24h
+  deletedRetentionTime: 7d
   poolSize: 2
   queueCapacity: 1000 # Maximum number of jobs in the queue
 

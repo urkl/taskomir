@@ -1,7 +1,7 @@
 package net.urosk.taskomir.core.service;
 
 import lombok.extern.slf4j.Slf4j;
-import net.urosk.taskomir.core.config.TaskExecutorConfig;
+import net.urosk.taskomir.core.config.TaskomirProperties;
 import net.urosk.taskomir.core.lib.TaskInfo;
 import net.urosk.taskomir.core.lib.TaskStatus;
 import net.urosk.taskomir.core.repository.TaskInfoRepository;
@@ -20,27 +20,26 @@ import java.util.List;
 public class TaskCleanupService {
 
     private final TaskInfoRepository repository;
-    private final TaskExecutorConfig taskExecutorConfig;
+    private final TaskomirProperties taskomirProperties;
 
     public TaskCleanupService(TaskInfoRepository repository,
-                              TaskExecutorConfig taskExecutorConfig) {
+                              TaskomirProperties taskomirProperties) {
         this.repository = repository;
-        this.taskExecutorConfig = taskExecutorConfig;
+        this.taskomirProperties = taskomirProperties;
     }
 
     /**
-     * Metoda se npr. proži vsakih 30 sekund (lahko poljubno),
-     * in iz baze odstrani stare, nepotrebne naloge.
+     * Metoda se proži na podlagi konfiguracije (`cleanupInterval`).
      */
-    @Scheduled(fixedDelayString = "${taskomir.cleanupIntervalMs:30000}")
+    @Scheduled(fixedDelayString = "#{@taskomirProperties.cleanupInterval.toMillis()}")
     public void cleanupOldTasks() {
         long now = System.currentTimeMillis();
 
-        // 1) Avtomatsko prepis SUCCEEDED => DELETED po X ms
-        long dayAgo = now - taskExecutorConfig.succeededRetentionTimeMs;
+        // 1) Avtomatsko prepis SUCCEEDED => DELETED po X sekundah
+        long succeededThreshold = now - taskomirProperties.getSucceededRetentionTime().toMillis();
         List<TaskInfo> succeeded = repository.findByStatusOrderByCreatedAtDesc(TaskStatus.SUCCEEDED);
         for (TaskInfo task : succeeded) {
-            if (task.getEndedAt() != null && task.getEndedAt() < dayAgo) {
+            if (task.getEndedAt() != null && task.getEndedAt() < succeededThreshold) {
                 task.setStatus(TaskStatus.DELETED);
                 task.setDeletedAt(System.currentTimeMillis());
                 repository.save(task);
@@ -48,11 +47,11 @@ public class TaskCleanupService {
             }
         }
 
-        // 2) Popolni izbris DELETED nalog, starejših od Y ms
-        long weekAgo = now - taskExecutorConfig.deletedRetentionTimeMs;
+        // 2) Popolni izbris DELETED nalog, starejših od Y sekund
+        long deletedThreshold = now - taskomirProperties.getDeletedRetentionTime().toMillis();
         List<TaskInfo> deleted = repository.findByStatusOrderByCreatedAtDesc(TaskStatus.DELETED);
         for (TaskInfo task : deleted) {
-            if (task.getDeletedAt() != null && task.getDeletedAt() < weekAgo) {
+            if (task.getDeletedAt() != null && task.getDeletedAt() < deletedThreshold) {
                 repository.delete(task);
                 log.info("Physically removed old DELETED task {}", task.getId());
             }
