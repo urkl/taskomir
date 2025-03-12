@@ -124,6 +124,75 @@ services:
         - "8081:8080"
   ```
 The primary instance actively processes tasks and runs scheduled jobs, ensuring that background tasks are executed by only one instance. The secondary instances serve solely as dashboards to display task statuses and progress, avoiding duplicate task processing.
+## Using in Your Project
+
+To use Taskomir in your project, add the following dependency to your `pom.xml`:
+
+```xml
+
+<dependency>
+    <groupId>net.urosk.taskomir</groupId>
+    <artifactId>taskomir-core</artifactId>
+    <version>${taskomir.version}</version>
+</dependency>
+
+```
+
+## Configuration
+
+Taskomir uses Spring Boot's `application.yml` (or `application.properties`) for configuration. Here are some common properties you can set:
+
+```yaml 
+taskomir:
+  primary: true
+  instanceId: MyAppInstance
+  cleanupInterval: 600s
+  succeededRetentionTime: 24h
+  deletedRetentionTime: 70d
+  poolSize: 8
+  queueCapacity: 100_000 # Maximum number of jobs in the queue
+  
+
+```
+### Explanation
+
+- **primary:**
+    - **Description:** Determines whether the current instance is the primary instance.
+    - **When set to true:**  
+      The instance actively executes scheduled tasks (e.g., job scheduling, cleanup operations).
+    - **When set to false:**  
+      The instance acts as a dashboard only; it does not perform any scheduled background processing.
+
+- **instanceId:**
+    - **Description:** A unique identifier for the running instance.
+    - **Usage:**  
+      Helps distinguish between different instances in a multi-instance setup (useful for logging, debugging, or monitoring).
+
+- **cleanupInterval:**
+    - **Description:** The interval at which Taskomir checks for tasks that need to be cleaned up.
+    - **Example:**  
+      `600s` means the cleanup process runs every 600 seconds (10 minutes).
+
+- **succeededRetentionTime:**
+    - **Description:** The duration for which successfully completed tasks are retained before being marked for deletion.
+    - **Example:**  
+      `24h` indicates that succeeded tasks are kept for 24 hours after completion.
+
+- **deletedRetentionTime:**
+    - **Description:** The duration for which tasks marked as deleted remain in the database before being permanently removed.
+    - **Example:**  
+      `70d` means that tasks will be retained for 70 days after being marked as deleted.
+
+- **poolSize:**
+    - **Description:** Specifies the number of threads available in the executor pool for concurrently processing tasks.
+    - **Example:**  
+      A value of `8` allows up to 8 tasks to run in parallel.
+
+- **queueCapacity:**
+    - **Description:** Defines the maximum number of tasks that can be queued for execution.
+    - **Example:**  
+      With a capacity of `100_000`, the system can handle a large number of pending tasks without dropping any.
+
 
 ## Build
 
