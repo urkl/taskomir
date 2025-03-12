@@ -206,8 +206,13 @@ public class TaskLifecycleService {
             stored.setProgress(taskInfo.getProgress());
             stored.setStatus(newStatus);
             stored.setCurrentProgress(taskInfo.getCurrentProgress());
-            stored.addLogLine("[" + LocalDateTime.now() + "] Progress: " + (taskInfo.getProgress() * 100) + "%" + " - " + taskInfo.getCurrentProgress());
+            //stored.addLogLine("[" + LocalDateTime.now() + "] Progress: " + (taskInfo.getProgress() * 100) + "%" + " - " + taskInfo.getCurrentProgress());
 
+            stored.addLogLine(String.format("[%s] Progress: %.2f%% - %s",
+                    LocalDateTime.now(),
+                    taskInfo.getProgress() * 100,
+                    taskInfo.getCurrentProgress() != null ? taskInfo.getCurrentProgress() : ""
+            ));
 
             if (newStatus == TaskStatus.PROCESSING && stored.getStartedAt() == null) {
                 stored.setStartedAt(System.currentTimeMillis());

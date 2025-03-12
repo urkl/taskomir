@@ -14,6 +14,8 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.data.provider.DataProvider;
 import com.vaadin.flow.data.provider.Query;
 import com.vaadin.flow.dom.ThemeList;
+import net.urosk.taskomir.core.config.TaskomirProperties;
+import net.urosk.taskomir.core.lib.ConfigEntry;
 import net.urosk.taskomir.core.lib.TaskInfo;
 import net.urosk.taskomir.core.lib.TaskStatus;
 import net.urosk.taskomir.core.sampleTask.SampleScheduledTask;
@@ -26,6 +28,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.vaadin.lineawesome.LineAwesomeIcon;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -36,7 +39,6 @@ import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static com.vaadin.flow.component.button.ButtonVariant.*;
-import static com.vaadin.flow.component.grid.GridVariant.LUMO_COMPACT;
 
 public class TaskDashboard extends VerticalLayout {
 
@@ -78,7 +80,8 @@ public class TaskDashboard extends VerticalLayout {
         // Dodaj ločilno črto
         add(new Hr());
 
-
+        add(createConfigPanel(taskomirService.getTaskomirProperties()));
+        add(new Hr());
         // SCHEDULED tasks
         H3 scheduledCounter = new H3("0");
         add(getHeader(LineAwesomeIcon.CALENDAR_ALT, messageSource.getMessage("ui.scheduledHeader", null, LocaleContextHolder.getLocale()), "var(--lumo-primary-color)", scheduledCounter));
@@ -156,18 +159,19 @@ public class TaskDashboard extends VerticalLayout {
 
     private void configureDefaultColumns(Grid<TaskInfo> grid, boolean showProgressBar, boolean addKillButton, boolean addError, boolean addExecuteNowButton) {
 
-        grid.addThemeVariants(LUMO_COMPACT, GridVariant.LUMO_WRAP_CELL_CONTENT);
+        grid.addThemeVariants(
+                GridVariant.LUMO_WRAP_CELL_CONTENT);
 
-        grid.addColumn(TaskInfo::getId).setHeader(messageSource.getMessage("grid.column.id", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(TaskInfo::getId).setHeader(messageSource.getMessage("grid.column.id", null, LocaleContextHolder.getLocale())).setResizable(true);
 
-        grid.addColumn(TaskInfo::getName).setHeader(messageSource.getMessage("grid.column.name", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(TaskInfo::getName).setHeader(messageSource.getMessage("grid.column.name", null, LocaleContextHolder.getLocale())).setResizable(true);
 
         grid.addColumn(task -> {
             if (task.getClassName() == null) return "";
             return task.getClassName().substring(task.getClassName().lastIndexOf('.') + 1);
-        }).setHeader(messageSource.getMessage("grid.column.type", null, LocaleContextHolder.getLocale()));
+        }).setHeader(messageSource.getMessage("grid.column.type", null, LocaleContextHolder.getLocale())).setResizable(true);
 
-        grid.addColumn(task -> task.getProgress() * 100 + "%").setHeader(messageSource.getMessage("grid.column.progress", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(task -> task.getProgress() * 100 + "%").setHeader(messageSource.getMessage("grid.column.progress", null, LocaleContextHolder.getLocale())).setResizable(true);
 
         if (showProgressBar) {
 
@@ -177,13 +181,13 @@ public class TaskDashboard extends VerticalLayout {
                 return progressBar;
             }).setHeader(messageSource.getMessage("grid.column.progress", null, LocaleContextHolder.getLocale()));
 
-            grid.addColumn(TaskInfo::getCurrentProgress).setHeader(messageSource.getMessage("grid.column.progressText", null, LocaleContextHolder.getLocale()));
+            grid.addColumn(TaskInfo::getCurrentProgress).setHeader(messageSource.getMessage("grid.column.progressText", null, LocaleContextHolder.getLocale())).setResizable(true);
         }
 
 
-        grid.addColumn(task -> task.getStatus().toString()).setHeader(messageSource.getMessage("grid.column.status", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(task -> task.getStatus().toString()).setHeader(messageSource.getMessage("grid.column.status", null, LocaleContextHolder.getLocale())).setResizable(true);
 
-        grid.addColumn(task -> LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getCreatedAt()), ZoneId.systemDefault()).format(SL_FORMATTER)).setHeader(messageSource.getMessage("grid.column.created", null, LocaleContextHolder.getLocale()));
+        grid.addColumn(task -> LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getCreatedAt()), ZoneId.systemDefault()).format(SL_FORMATTER)).setHeader(messageSource.getMessage("grid.column.created", null, LocaleContextHolder.getLocale())).setResizable(true);
 
 
         grid.addColumn(task -> task.getStartedAt() != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getStartedAt()), ZoneId.systemDefault()).format(SL_FORMATTER) : "").setHeader(messageSource.getMessage("grid.column.started", null, LocaleContextHolder.getLocale()));
@@ -192,6 +196,7 @@ public class TaskDashboard extends VerticalLayout {
 
         grid.addColumn(task -> task.getLastRunTime() != null ? LocalDateTime.ofInstant(Instant.ofEpochMilli(task.getLastRunTime()), ZoneId.systemDefault()).format(SL_FORMATTER) : "").setHeader(messageSource.getMessage("grid.column.lastRun", null, LocaleContextHolder.getLocale()));
         grid.addColumn(TaskInfo::getCronExpression).setHeader(messageSource.getMessage("grid.column.cron", null, LocaleContextHolder.getLocale()));
+
         grid.addColumn(TaskInfo::getParentId).setHeader(messageSource.getMessage("grid.column.parent", null, LocaleContextHolder.getLocale()));
 
         if (addError)
@@ -319,4 +324,43 @@ public class TaskDashboard extends VerticalLayout {
 
         return new Tab(layout);
     }
+    private String formatDuration(Duration duration) {
+        long days = duration.toDays();
+        long hours = duration.toHours() % 24;
+        long minutes = duration.toMinutes() % 60;
+        long seconds = duration.getSeconds() % 60;
+
+        if (days > 0) return days + " d";
+        if (hours > 0) return hours + " h";
+        if (minutes > 0) return minutes + " min";
+        return seconds + " s";
+    }
+    private Component createConfigPanel(TaskomirProperties properties) {
+        VerticalLayout configLayout = new VerticalLayout();
+        configLayout.setPadding(true);
+        configLayout.setSpacing(true);
+
+        // Dodaj ikono in barvo v header
+        var configHeader = getHeader(LineAwesomeIcon.COG_SOLID,
+                messageSource.getMessage("ui.config.header", null, LocaleContextHolder.getLocale()),
+                "var(--lumo-primary-color)");
+
+        Grid<ConfigEntry> configGrid = new Grid<>(ConfigEntry.class, false);
+        configGrid.setItems(
+                new ConfigEntry(messageSource.getMessage("ui.config.cleanupInterval", null, LocaleContextHolder.getLocale()), formatDuration(properties.getCleanupInterval())),
+                new ConfigEntry(messageSource.getMessage("ui.config.succeededRetentionTime", null, LocaleContextHolder.getLocale()), formatDuration(properties.getSucceededRetentionTime())),
+                new ConfigEntry(messageSource.getMessage("ui.config.deletedRetentionTime", null, LocaleContextHolder.getLocale()), formatDuration(properties.getDeletedRetentionTime())),
+                new ConfigEntry(messageSource.getMessage("ui.config.poolSize", null, LocaleContextHolder.getLocale()), String.valueOf(properties.getPoolSize())),
+                new ConfigEntry(messageSource.getMessage("ui.config.queueCapacity", null, LocaleContextHolder.getLocale()), String.valueOf(properties.getQueueCapacity()))
+        );
+
+        configGrid.addColumn(ConfigEntry::getKey).setHeader(messageSource.getMessage("ui.config.parameter", null, LocaleContextHolder.getLocale()));
+        configGrid.addColumn(ConfigEntry::getValue).setHeader(messageSource.getMessage("ui.config.value", null, LocaleContextHolder.getLocale()));
+
+        configLayout.add(configHeader, configGrid);
+        return configLayout;
+    }
+
+
+
 }

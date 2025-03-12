@@ -12,9 +12,9 @@ import java.util.concurrent.TimeUnit;
 public class ExecutorConfig {
 
     @Bean
-    public ThreadPoolExecutor executorService(TaskExecutorConfig taskExecutorConfig) {
-        int poolSize = taskExecutorConfig.poolSize;       // Nastavljivo število background taskov
-        int queueCapacity = taskExecutorConfig.queueCapacity; // Kapaciteta čakalne vrste
+    public ThreadPoolExecutor executorService(TaskomirProperties taskomirProperties) {
+        int poolSize = taskomirProperties.getPoolSize();
+        int queueCapacity = taskomirProperties.getQueueCapacity();
         return new ThreadPoolExecutor(
                 poolSize,
                 poolSize,

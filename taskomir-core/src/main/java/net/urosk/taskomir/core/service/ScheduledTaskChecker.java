@@ -1,7 +1,7 @@
 package net.urosk.taskomir.core.service;
 
 import lombok.extern.slf4j.Slf4j;
-import net.urosk.taskomir.core.config.TaskExecutorConfig;
+import net.urosk.taskomir.core.config.TaskomirProperties;
 import net.urosk.taskomir.core.lib.TaskInfo;
 import net.urosk.taskomir.core.lib.TaskStatus;
 import net.urosk.taskomir.core.repository.TaskInfoRepository;
@@ -25,21 +25,21 @@ public class ScheduledTaskChecker {
 
     private final TaskInfoRepository repository;
     private final TaskLifecycleService taskLifecycleService;
-    private final TaskExecutorConfig taskExecutorConfig;
+    private final TaskomirProperties taskomirProperties;
 
     public ScheduledTaskChecker(TaskInfoRepository repository,
                                 TaskLifecycleService taskLifecycleService,
-                                TaskExecutorConfig taskExecutorConfig) {
+                                TaskomirProperties taskomirProperties) {
         this.repository = repository;
         this.taskLifecycleService = taskLifecycleService;
-        this.taskExecutorConfig = taskExecutorConfig;
+        this.taskomirProperties = taskomirProperties;
     }
 
     /**
-     * Vsakih 15 sekund preveri, ali obstaja SCHEDULED naloga,
-     * katere 'next execution time' je že pretekel.
+     * Periodično preveri, ali obstaja SCHEDULED naloga, katere 'next execution time' je že pretekel.
+     * Interval preverjanja je določen v konfiguraciji `taskomir.scheduledCheckInterval`
      */
-    @Scheduled(fixedDelay = 15000) // prilagodi po potrebi
+    @Scheduled(fixedDelayString = "#{@taskomirProperties.scheduledCheckInterval.toMillis()}")
     public void checkScheduledTasks() {
         long nowMillis = System.currentTimeMillis();
         Instant nowInstant = Instant.ofEpochMilli(nowMillis);
