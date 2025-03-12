@@ -2,6 +2,7 @@ package net.urosk.taskomir.core.lib;
 
 
 import lombok.Setter;
+import net.urosk.taskomir.core.domain.TaskInfo;
 
 /**
  * Abstract class for all scheduled tasks.

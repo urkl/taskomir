@@ -2,6 +2,7 @@ package net.urosk.taskomir.core.lib;
 
 
 import lombok.extern.slf4j.Slf4j;
+import net.urosk.taskomir.core.domain.TaskInfo;
 import net.urosk.taskomir.core.service.TaskLifecycleService;
 
 
