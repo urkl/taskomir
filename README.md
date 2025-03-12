@@ -35,12 +35,13 @@ Of course, you can use any other database, just implement the TaskRepository int
 
 
 ## TODO
-
-- [ ] Add tests
+- [x] Deploy to Maven  Central Repository
+- [x] Set primary, secondary instance for Taskomir
+- [x] Add AI generated tests
+- [ ] Add user Tests
 - [ ] Add more features
 - [ ] Add more documentation
-- [ ] Add more tests
-- [ ] Deploy to Maven  Central Repository
+
 
 ## Structure
 
