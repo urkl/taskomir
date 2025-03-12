@@ -21,7 +21,7 @@ taskomir:
   deletedRetentionTime: 7d
   poolSize: 2
   queueCapacity: 1000 # Maximum number of jobs in the queue
-  instance-id: TaskomirDemoDashboard
+  instanceId: TaskomirDemoDashboard
 
 
 
