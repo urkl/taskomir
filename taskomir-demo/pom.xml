@@ -7,12 +7,12 @@
     <parent>
         <groupId>net.urosk.taskomir</groupId>
         <artifactId>taskomir-parent</artifactId>
-        <version>1.0.8</version>
+        <version>1.0.9</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>demo</artifactId>
-    <version>1.0.8</version>
+    <version>1.0.9</version>
     <packaging>jar</packaging>
 
     <name>demo</name>
