@@ -1,5 +1,6 @@
 package net.urosk.taskomir.core.service;
 
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.urosk.taskomir.core.domain.TaskInfo;
 import net.urosk.taskomir.core.lib.*;
@@ -14,10 +15,7 @@ import org.springframework.scheduling.support.CronExpression;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -33,6 +31,7 @@ public class TaskLifecycleService {
     private final ApplicationContext applicationContext;
 
     // Beležimo vse, ki so trenutno v teku (ENQUEUED ali PROCESSING)
+    @Getter
     private final ConcurrentHashMap<String, Future<?>> runningTasks = new ConcurrentHashMap<>();
 
     public TaskLifecycleService(TaskInfoRepository repository,
@@ -289,4 +288,5 @@ public class TaskLifecycleService {
     public Optional<TaskInfo> findByNameAndStatus(String taskName, TaskStatus taskStatus) {
         return repository.findByNameAndStatus(taskName, taskStatus);
     }
+
 }

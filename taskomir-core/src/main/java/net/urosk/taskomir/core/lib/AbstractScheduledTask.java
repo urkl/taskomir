@@ -13,7 +13,7 @@ public abstract class AbstractScheduledTask implements ProgressTask {
     protected TaskInfo taskInfo;
 
     @Override
-    public final void execute(ProgressUpdater progressUpdater) throws Exception {
+    public  void execute(ProgressUpdater progressUpdater) throws Exception {
         // Tukaj lahko dodate kak skupen logging, varnostne preverbe ipd.
         runScheduledLogic(progressUpdater);
     }

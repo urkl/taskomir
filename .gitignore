@@ -34,3 +34,5 @@ build/
 /taskomir-demo/node_modules/
 
 taskomir-core/.flattened-pom.xml
+
+taskomir-core/.attach_pid1915853
