@@ -194,6 +194,56 @@ taskomir:
       With a capacity of `100_000`, the system can handle a large number of pending tasks without dropping any.
 
 
+## Using Taskomir Tasks
+
+Taskomir provides a simple, centralized task system that supports both one-off and recurring (scheduled) tasks. It is designed to handle intensive background processing, such as processing large Excel files, generating hundreds of thousands of thumbnails, creating extensive PDF reports, and more.
+
+### One-Off Tasks
+
+You can enqueue a one-off task that executes immediately if a thread in the pool is available; otherwise, it waits in the queue until a thread becomes free.
+
+For example, the following code enqueues a simple task that updates its progress from 0% to 100%:
+
+```java
+private void addNewTask() {
+    taskomirService.enqueue(
+            "MyTaskNAme",
+            progress -> {
+                for (int i = 0; i <= 100; i++) {
+                    progress.update(i / 100.0, "");
+                    try {
+                        Thread.sleep(100); // simulate work
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+    );
+}
+```
+The enqueue method schedules a one-off task. The task name is required, 
+and the lambda expression defines the work to be done. The task will start immediately if a thread is available in the pool; otherwise, it waits until a thread becomes free.
+
+### Scheduled Tasks
+```java
+private void addNewTask() {
+    String cronExpression = "0 0 0 * * ?"; // every day at midnight
+    taskomirService
+            .createScheduledTask("Scheduled task", new SampleScheduledTask(), cronExpression, true);
+}
+```
+This call creates a master scheduled task that triggers based on the provided cronExpression. 
+The SampleScheduledTask is an implementation of your scheduled task logic. The skipIfAlreadyRunning parameter ensures that if a child task is already running for the master task, a new one will not be enqueued.
+This is useful when recreating a DWH tables, for example. You don't want to have multiple tasks running at the same time.
+
+
+Taskomir’s design allows you to:
+
+Enqueue tasks immediately: They run as soon as a thread in the pool is available, or wait if the pool is full.
+Schedule recurring tasks: Using cron expressions, you can have tasks that execute periodically.
+Centralize task management: One primary instance performs the background processing, while secondary instances can be used as dashboards for monitoring task status.
+
+
 ## Build
 
 ### Start new release
@@ -226,6 +276,21 @@ Licensed under the [MIT](LICENSE).
 Please review the license file for more information.
 
 ---
+
+
+## Centralized Task System for Museums and  Galleries Documentation
+
+I use Taskomir for a museums  and galleries documentation application where we generate comprehensive Excel files for detailed reports, 
+create PDFs of up to 300 pages, 
+and produce various types of thumbnails (for videos, images, documents, etc.)—sometimes handling hundreds of thousands of thumbnails. 
+
+The application also imports very large Excel files, which is why I needed a centralized task system to efficiently manage these intensive operations.
+
+Feel free to use Taskomir and even contribute by adding new functionalities. 
+
+Genius lies in simplicity.
+
+
 
 **Author**: Uroš Kristan
 
