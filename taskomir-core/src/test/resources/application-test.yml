@@ -1,14 +1,17 @@
 spring:
   data:
     mongodb:
-      # Preglasite produkcijski connection string z prazno vrednostjo,
-      # da Embedded MongoDB auto-konfiguracija začne delovati
-      uri: ""
       database: testdb
-  mongodb:
-    embedded:
-      enabled: true
-      port: 0           # port 0 pomeni, da se uporabi naključno dodeljen port
-      version: 4.0.21   # nastavite ustrezno verzijo Embedded MongoDB
+
+
+
+taskomir:
+  primary: true
+  cleanupInterval: 3s
+  succeededRetentionTime: 50s
+  deletedRetentionTime: 200s
+  poolSize: 2
+  queueCapacity: 1000 # Maximum number of jobs in the queue
+  instanceId: TaskomirTest
 
 

@@ -101,6 +101,7 @@
         <vaadin.version>24.6.5</vaadin.version>
         <lombok.version>1.18.36</lombok.version>
         <amascenko.version>1.16.0</amascenko.version>
+        <testContainers.version>1.20.6</testContainers.version>
     </properties>
 
 
