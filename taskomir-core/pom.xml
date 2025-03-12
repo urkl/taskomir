@@ -7,12 +7,12 @@
     <parent>
         <groupId>net.urosk.taskomir</groupId>
         <artifactId>taskomir-parent</artifactId>
-        <version>1.0.6</version>
+        <version>1.0.7</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <artifactId>taskomir-core</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
     <packaging>jar</packaging>
 
     <name>Taskomir core</name>
@@ -51,11 +51,11 @@
             <version>2.1.0</version>
         </dependency>
 
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <scope>runtime</scope>
-        </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.h2database</groupId>-->
+<!--            <artifactId>h2</artifactId>-->
+<!--            <scope>runtime</scope>-->
+<!--        </dependency>-->
 
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -66,12 +66,39 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
+            <exclusions>
+                <!-- Če želiš uporabiti JUnit 5, odstrani JUnit 4 -->
+                <exclusion>
+                    <groupId>junit</groupId>
+                    <artifactId>junit</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- Testcontainers core -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers</artifactId>
+            <version>${testContainers.version}</version>
+            <scope>test</scope>
         </dependency>
 
+        <!-- Testcontainers modul za MongoDB -->
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>mongodb</artifactId>
+            <version>${testContainers.version}</version>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-inline</artifactId>
             <version>3.6.0</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>${testContainers.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -94,7 +121,16 @@ The flatten-maven-plugin with <flattenMode>ossrh</flattenMode> ensures:
 Maven Central Compliance: The flattened POM (used during deployment) explicitly includes all dependency versions, resolving placeholders like ${project.version}. This is mandatory for OSSRH (Maven Central’s repository hosting).
 Version Stability: The generated pom.xml in the artifact becomes self-contained, avoiding reliance on parent POMs for version resolution.
 Avoids "Missing Version" Errors: Without flattening, Maven Central rejects deployments if versions are inherited (e.g., via <parent> or <dependencyManagement>).
--->
+--><plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-surefire-plugin</artifactId>
+            <version>3.0.0-M7</version>
+            <configuration>
+                <argLine>
+                    -javaagent:"${settings.localRepository}/net/bytebuddy/byte-buddy-agent/1.15.11/byte-buddy-agent-1.15.11.jar"
+                </argLine>
+            </configuration>
+        </plugin>
 
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>

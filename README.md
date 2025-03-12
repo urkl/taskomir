@@ -35,12 +35,13 @@ Of course, you can use any other database, just implement the TaskRepository int
 
 
 ## TODO
-
-- [ ] Add tests
+- [x] Deploy to Maven  Central Repository
+- [x] Set primary, secondary instance for Taskomir
+- [x] Add AI generated tests
+- [ ] Add user Tests
 - [ ] Add more features
 - [ ] Add more documentation
-- [ ] Add more tests
-- [ ] Deploy to Maven  Central Repository
+
 
 ## Structure
 
@@ -75,6 +76,54 @@ Of course, you can use any other database, just implement the TaskRepository int
 
 4. **Integrate the Core Library**
     - Include the published `taskomir-core` artifact in your Maven (or Gradle) project, and follow the usage examples to enqueue tasks, manage schedules, etc.
+
+## Multiple Instances with Primary/Secondary Configuration
+
+Taskomir now supports running in multiple instances concurrently. However, only one instance is designated as **Primary**, which actively executes scheduled tasks and manages background jobs. The remaining instances are **Secondary** and serve primarily as dashboards, displaying real-time status updates without executing background tasks.
+
+### Configuration
+
+You can control the behavior of each instance by setting the `taskomir.primary` property in your configuration (for example, in `application.yml` or via environment variables).
+
+
+- **Primary Instance (Primarna instanca):**
+    -  Set `taskomir.primary=true` to enable scheduling and background processing.
+
+
+  ```yaml
+  taskomir:
+    primary: true
+    instanceId: PrimaryInstance
+  ```
+
+- **Secondary Instance (Primarna instanca):**
+  - Set `taskomir.primary=false` to disable scheduling; these instances function mainly as dashboards.
+
+```yaml
+  taskomir:
+    primary: false
+    instanceId: DashboardInstance
+  ```
+- **Example in Docker Compose:**
+```yaml
+services:
+    primary-instance:
+        image: your-app-image:latest
+        environment:
+        - taskomir.primary=true
+        - taskomir.instanceId=PrimaryInstance
+        ports:
+        - "8080:8080"
+        
+    dashboard-instance:
+        image: your-app-image:latest
+        environment:
+        - taskomir.primary=false
+        - taskomir.instanceId=DashboardInstance
+        ports:
+        - "8081:8080"
+  ```
+The primary instance actively processes tasks and runs scheduled jobs, ensuring that background tasks are executed by only one instance. The secondary instances serve solely as dashboards to display task statuses and progress, avoiding duplicate task processing.
 
 ## Build
 
