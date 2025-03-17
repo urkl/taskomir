@@ -15,7 +15,7 @@ server:
 
 
 taskomir:
-  primary: false
+  primary: true
   cleanupInterval: 30s
   succeededRetentionTime: 24h
   deletedRetentionTime: 7d
