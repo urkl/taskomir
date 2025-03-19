@@ -7,11 +7,9 @@ spring:
 
 taskomir:
   primary: true
-  cleanupInterval: 3s
-  succeededRetentionTime: 50s
-  deletedRetentionTime: 200s
+  cleanupInterval: 30s
+  succeededRetentionTime: 24h
+  deletedRetentionTime: 7d
   poolSize: 2
   queueCapacity: 1000 # Maximum number of jobs in the queue
-  instanceId: TaskomirTest
-
-
+  instanceId: Vodostaj
