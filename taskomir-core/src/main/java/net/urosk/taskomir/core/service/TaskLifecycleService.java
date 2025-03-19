@@ -6,6 +6,7 @@ import net.urosk.taskomir.core.domain.TaskInfo;
 import net.urosk.taskomir.core.lib.*;
 import net.urosk.taskomir.core.repository.TaskInfoRepository;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -35,7 +36,7 @@ public class TaskLifecycleService {
     private final ConcurrentHashMap<String, Future<?>> runningTasks = new ConcurrentHashMap<>();
 
     public TaskLifecycleService(TaskInfoRepository repository,
-                                ThreadPoolExecutor executorService,
+                                @Autowired(required = false) ThreadPoolExecutor executorService,
                                 MessageSource messageSource,
                                 ApplicationContext applicationContext) {
         this.repository = repository;

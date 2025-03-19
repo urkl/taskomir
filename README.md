@@ -55,7 +55,57 @@ Of course, you can use any other database, just implement the TaskRepository int
 
 ## Usage
 
+### Usage from maven repo
+
+1. **Add dependency to pom.xml**
+
+```xml
+    <dependency>
+        <groupId>net.urosk.taskomir</groupId>
+        <artifactId>taskomir-core</artifactId>
+        <version>1.0.6</version>
+    </dependency>
+```
+
+2. **Add taskomir configs to application.yml**
+
+```yaml
+taskomir:
+    primary: true # Set to true for the primary instance
+    instanceId: KronosUser # Unique identifier for the instance
+    cleanupInterval: 60s # Cleanup interval for succeeded tasks
+    succeededRetentionTime: 24h  # time for succeeded tasks to be retained
+    deletedRetentionTime: 70d # 70 days
+    poolSize: 4 # Number of threads in the executor pool
+    queueCapacity: 100_000 # Maximum number of jobs in the queue    
+```
+
+3. **Add TaskomirService to your service**
+
+```java
+    @Autowired
+    private TaskomirService taskomirService;
+```
+
+4. Add Enable Scheduling and Enable MongoDB Repositories to your main class
+```java
+
+@SpringBootApplication(scanBasePackages = {"net.urosk", "your-package"} )
+@EnableMongoRepositories(basePackages = {"net.urosk"})
+@EnableScheduling
+public class MyApp   {
+
+    public static void main(String[] args) {
+        SpringApplication.run(MyApp.class, args);
+    }
+
+}
+```
+
+
+
 1. **Clone the Repository**
+        
    ```bash
    git clone https://github.com/urkl/taskomir.git
    cd taskomir
