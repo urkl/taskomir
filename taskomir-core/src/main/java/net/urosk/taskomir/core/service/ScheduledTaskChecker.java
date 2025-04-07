@@ -54,7 +54,7 @@ public class ScheduledTaskChecker {
     @Scheduled(fixedDelayString = "#{@taskomirProperties.cleanupInterval.toMillis()}")
     public void cleanupOldTasks() {
 
-        log.info("Cleaning up old tasks");
+        log.debug("Cleaning up old tasks");
         long now = System.currentTimeMillis();
 
         // 1) Avtomatsko prepis SUCCEEDED => DELETED po X sekundah
@@ -86,7 +86,7 @@ public class ScheduledTaskChecker {
     @Scheduled(fixedDelayString = "#{@taskomirProperties.scheduledCheckInterval.toMillis()}")
     public void checkScheduledTasks() {
 
-        log.info("Checking scheduled tasks...");
+        log.debug("Checking scheduled tasks...");
         long nowMillis = System.currentTimeMillis();
         Instant nowInstant = Instant.ofEpochMilli(nowMillis);
 
